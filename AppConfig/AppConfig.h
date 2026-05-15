@@ -4,11 +4,18 @@
 
 #include <string>
 
+enum class OutputMode
+{
+    FILE,
+    HTTP
+};
+
 struct AppConfig
 {
     std::string targetPath;
     int intervalSeconds = 10;
     std::string configFilePath;
+    OutputMode mode = OutputMode::FILE;
 };
 
 #endif

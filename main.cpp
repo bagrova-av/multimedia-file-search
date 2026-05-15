@@ -32,28 +32,40 @@ int main(int argc, char** argv)
     }
 
     MediaScanner mediaScanner(config.value().targetPath);
-    MediaServer mediaServer("0.0.0.0", 1234);
+    std::unique_ptr<MediaServer> mediaServer;
+    std::thread mediaServerThread;
 
-    std::thread mediaServerThread([&mediaServer]()
-                            {
-                                mediaServer.run();
-                            }
-    );
-
-    std::cout << "Starting media scanner on: " << config.value().targetPath << '\n';
+    if (config.value().mode == OutputMode::HTTP)
+    {
+        mediaServer = std::make_unique<MediaServer>("0.0.0.0", 1234);
+        mediaServerThread = std::thread([&mediaServer]()
+                                        {
+                                            mediaServer->run();
+                                        }
+        );
+        std::cout << "Mode: HTTP Server (http://localhost:1234/media_files)" << '\n';
+    }
+    else
+    {
+        std::cout << "Mode: file System (.media_files)" << '\n';
+    }
     std::cout << "Interval: " << config.value().intervalSeconds << "sec" << '\n';
-
-     std::cout << "Press Ctrl+C to stop" << '\n';
+    std::cout << "Press Ctrl+C to stop" << '\n';
     
+    std::cout << "Scanning..." << '\n';
     while (keepRunning)
     {
-        std::cout << "Scanning..." << '\n';
-
         auto results = mediaScanner.scan();
         std::string jsonStr = mediaScanner.getJsonResult(results);
 
-        saveJsonToFile(config.value().configFilePath, jsonStr);
-        mediaServer.updateData(std::move(jsonStr));
+        if (config.value().mode == OutputMode::HTTP)
+        {
+            mediaServer->updateData(std::move(jsonStr));
+        }
+        else
+        {
+            saveJsonToFile(config.value().configFilePath, jsonStr);
+        }
 
         for (int i = 0; i < config.value().intervalSeconds && keepRunning; ++i)
         {
@@ -62,13 +74,14 @@ int main(int argc, char** argv)
     }
 
     std::cout << "\nShutting down..." << '\n';
-    mediaServer.stop();
-
-    if (mediaServerThread.joinable())
+    if (mediaServer)
     {
-        mediaServerThread.join();
+        mediaServer->stop();
+        if (mediaServerThread.joinable())
+        {
+            mediaServerThread.join();
+            std::cout << "Server stopped" << '\n';
+        }
     }
-
-    std::cout << "Server stopped" << '\n';
     return 0;
 }
