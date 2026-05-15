@@ -1,4 +1,5 @@
 #include "MediaScanner.h"
+#include "../common/utils.h"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ MediaScanner::MediaScanner(fs::path rootPath) :
 std::optional<MediaType> MediaScanner::getFileCategory(const fs::path& filePath) const
 {
     std::string fileExtension = filePath.extension().string();
-    std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
+    fileExtension = toLowerCase(fileExtension);
 
     static const std::unordered_set<std::string> audioExtension = {".mp3", ".wav", ".flac"};
     static const std::unordered_set<std::string> videoExtension = {".mp4", ".avi", ".mkv", ".mpg"};

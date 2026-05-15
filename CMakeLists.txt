@@ -14,11 +14,15 @@ FetchContent_MakeAvailable(json)
 set(SOURCE_LIST
     main.cpp
     MediaScanner/MediaScanner.cpp
+    common/utils.cpp
+    common/parseUtils.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCE_LIST})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     MediaScanner
+    common
+    AppConfig
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
