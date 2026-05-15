@@ -11,9 +11,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(json)
 
+FetchContent_Declare(
+    httplib
+    URL https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.14.3.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(httplib)
+
 set(SOURCE_LIST
     main.cpp
     MediaScanner/MediaScanner.cpp
+    MediaServer/MediaServer.cpp
     common/utils.cpp
     common/parseUtils.cpp
 )
@@ -21,8 +29,12 @@ add_executable(${PROJECT_NAME} ${SOURCE_LIST})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     MediaScanner
+    MediaServer
     common
     AppConfig
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    nlohmann_json::nlohmann_json
+    httplib
+)
