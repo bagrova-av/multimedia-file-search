@@ -15,6 +15,9 @@ public:
     void stop();
 
 private:
+    std::string hostIP;
+    int port;
+
     httplib::Server server;
     std::string currentJson;
     std::mutex dataMutex;

@@ -2,15 +2,17 @@
 
 #include <iostream>
 
-MediaServer::MediaServer(const std::string& host, int port)
+MediaServer::MediaServer(const std::string& host, int port) :
+    port(port),
+    hostIP(host)
 {
     server.Get("/media_files", [this](const httplib::Request& request, httplib::Response& response) 
-    {
-        std::lock_guard<std::mutex> lock(dataMutex);
-        
-        response.set_content(currentJson, "application/json");
-        std::cout << "HTTP: Sent response to " << request.remote_addr << '\n';
-    });
+                                {
+                                    std::lock_guard<std::mutex> lock(dataMutex);
+
+                                    response.set_content(currentJson, "application/json");
+                                    std::cout << "HTTP: Sent response to " << request.remote_addr << '\n';
+                                });
 }
 
 void MediaServer::updateData(std::string newJson)
@@ -22,7 +24,7 @@ void MediaServer::updateData(std::string newJson)
 void MediaServer::run()
 {
     std::cout << "Server is starting on localhost:1234" << '\n';
-    if (!server.listen("0.0.0.0", 1234))
+    if (!server.listen(hostIP.c_str(), port))
     {
         std::cerr << "Error: could not start HTTP server" << '\n';
     }
